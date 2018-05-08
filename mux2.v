@@ -1,5 +1,4 @@
-` ifndef _mux2
-` define _mux2
+
 
 module mux2(sel, data, data_out);
 
@@ -10,14 +9,13 @@ parameter
 	
 
 		input 		[sel_size-1:0] sel;
-		input		[data_size:0] data [data_num-1:0];
+		input		[data_size:0][data_num-1:0] data;
 		output reg	[data_size:0] data_out;
 
-	always @(data, sel)
+	always @(data[data_num-1:0], sel)
 	begin
 		data_out <= data[sel];
 	end
 	
 endmodule
 
-` endif

@@ -1,6 +1,3 @@
-` ifndef _control
-` define _control
-
 module control(
 		input		[5:0] opcode,
 		output reg	[10:0] control_signal
@@ -27,5 +24,3 @@ module control(
 	end
 
 endmodule
-
-` endif		

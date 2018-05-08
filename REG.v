@@ -1,11 +1,8 @@
-` ifndef _REG
-` define _REG
-
 module REG(
 		input 		clk,
-		input 			[5:0] REG_address_1,
-		input 			[5:0] REG_address_2,
-		input 			[5:0] REG_address_wr,
+		input 			[4:0] REG_address_1,
+		input 			[4:0] REG_address_2,
+		input 			[4:0] REG_address_wr,
 		input		REG_write_1,
 		input 			[31:0] REG_data_wb_in1,
 		output reg 		[31:0] REG_data_out1,
@@ -14,13 +11,13 @@ module REG(
 
 	reg [31:0] regr [31:0];
 
-	always@(REG_address_1, REG_address_2)
+	always@(negedge clk)
 	begin
 		REG_data_out1 = (REG_address_1==0) ? 32'b0 : regr[REG_address_1];
 		REG_data_out2 = (REG_address_2==0) ? 32'b0 : regr[REG_address_2];
 	end
 
-	always@(negedge clk)
+	always@(posedge clk)
 	begin
 		if (REG_write_1)
 			begin
@@ -28,6 +25,3 @@ module REG(
 			end
 	end
 endmodule
-
-
-` endif

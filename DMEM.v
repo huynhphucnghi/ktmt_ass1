@@ -1,6 +1,3 @@
-` ifndef _DMEM
-` define _DMEM
-
 module DMEM(
 		input		clk,
 		input		[31:0] DMEM_address,
@@ -30,5 +27,3 @@ module DMEM(
 		end
 	end
 endmodule
-
-` endif

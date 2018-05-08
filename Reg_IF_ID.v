@@ -1,6 +1,3 @@
-` ifndef _Reg_IF_ID
-` define _Reg_IF_ID
-
 module Reg_IF_ID(
 		input 		clk,
 		input		[7:0] PC,
@@ -21,5 +18,3 @@ module Reg_IF_ID(
 	end
 
 endmodule
-
-` endif

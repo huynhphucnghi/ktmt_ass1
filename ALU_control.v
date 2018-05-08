@@ -1,6 +1,3 @@
-` ifndef _ALU_control
-` define _ALU_control
-
 module ALU_control(
 		input 		[1:0] ALU_op,
 		input 		[5:0] ALU_funct,
@@ -27,4 +24,3 @@ module ALU_control(
 		endcase
 	end
 endmodule
-` endif

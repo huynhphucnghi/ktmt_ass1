@@ -1,6 +1,3 @@
-` ifndef _ALU
-` define _ALU
-
 module ALU(
 		input 		[3:0] ALU_control,
 		input		[31:0] ALU_operand_1,
@@ -67,26 +64,3 @@ module ALU(
 	assign ALU_status = {zero, overflow, carry, negative, invalid_address, div_zero, 2'b00};
 	
 endmodule
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-` endif

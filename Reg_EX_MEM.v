@@ -1,6 +1,3 @@
-` ifndef _Reg_EX_MEM
-` define _Reg_EX_MEM
-
 module Reg_ID_EX(
 		input 		clk,
 		input		[1:0] WB,
@@ -41,5 +38,3 @@ module Reg_ID_EX(
 	end
 
 endmodule
-
-` endif

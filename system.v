@@ -1,6 +1,3 @@
-` ifndef _system
-` define _system
-
 module system(
 			input		SYS_clk,
 			input		SYS_reset,
@@ -11,39 +8,3 @@ module system(
 );
 
 endmodule
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-` endif

@@ -1,6 +1,3 @@
-` ifndef _Reg_ID_EX
-` define _Reg_ID_EX
-
 module Reg_ID_EX(
 		input 		clk,
 		input		[1:0] WB,
@@ -48,4 +45,3 @@ module Reg_ID_EX(
 
 endmodule
 
-` endif

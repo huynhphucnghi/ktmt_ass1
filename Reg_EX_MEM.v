@@ -1,4 +1,4 @@
-module Reg_ID_EX(
+module Reg_EX_MEM(
 		input 		clk,
 		input		[1:0] WB,
 		input		[2:0] M,		

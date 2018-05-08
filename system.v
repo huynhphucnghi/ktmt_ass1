@@ -4,7 +4,9 @@ module system(
 			input		SYS_load,
 			input [7:0]	SYS_pc_val,
 			input [7:0]	SYS_output_sel,
-			output [26:0]	SYS_leds
+			input [31:0] SYS_dram_input,
+			output [26:0]SYS_leds,
+			output [12:0]SYS_dram_addr
 );
 
 endmodule

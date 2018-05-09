@@ -8,7 +8,6 @@ module control(
 	always@(opcode)
 	begin
 		case (opcode)
-			//Tên bit
 			//Jump 10
 			//Branch 9
 			//MemRead 8

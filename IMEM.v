@@ -3,11 +3,15 @@ module IMEM(
 		input 		[7:0] 	IMEM_PC,
 		output reg	[31:0]	IMEM_instruction
 );
-	reg [31:0] instruction [7:0];
+	
+	reg [31:0] ram [0:63];
 
+	initial begin
+  		$readmemh("rams_init_file.txt", ram);
+	end
 	always@(negedge clk)
 	begin
-		IMEM_instruction <= instruction[IMEM_PC];
+		IMEM_instruction <= ram[IMEM_PC];
 	end
 
 endmodule

@@ -1,4 +1,4 @@
-module Reg_ID_EX(
+module Reg_MEM_WB(
 		input 		clk,
 		input		[1:0] WB,
 		input		[31:0] read_data,

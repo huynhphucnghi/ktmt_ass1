@@ -6,9 +6,9 @@ module system_interface(
 );
 
 system _system(
-			KEY[0],
-			KEY[2],
+			!KEY[0],
 			KEY[1],
+			KEY[2],
 			SW[10:3],
 			SW[17:10],
 			{LEDR, LEDG}

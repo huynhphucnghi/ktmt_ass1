@@ -4,7 +4,7 @@ module DMEM(
 		input		[31:0] DMEM_data_in,
 		input		DMEM_mem_write,
 		input		DMEM_mem_read,
-		output reg	[31:0] DMEM_data_out
+		output	[31:0] DMEM_data_out
 );
 	reg [7:0] memory [255:0];
 	
@@ -19,11 +19,6 @@ module DMEM(
 		end
 	end
 
-	always@(DMEM_address)
-	begin
-		if(DMEM_mem_read)
-		begin
-			DMEM_data_out = {memory[DMEM_address],memory[DMEM_address+1],memory[DMEM_address+2],memory[DMEM_address+3]};
-		end
-	end
+	assign DMEM_data_out = (DMEM_mem_read) ?
+			{memory[DMEM_address],memory[DMEM_address+1],memory[DMEM_address+2],memory[DMEM_address+3]} : 32'd0;
 endmodule

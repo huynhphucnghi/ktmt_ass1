@@ -5,6 +5,6 @@ module Sign_extend(
 );
 	
 	always@(data_in)
-		data_out = {16'b0,data_in};
+		data_out = data_in[15] ? {16'hFFFF,data_in} : {16'h0,data_in};
 
 endmodule

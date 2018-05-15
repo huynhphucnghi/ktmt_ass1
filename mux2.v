@@ -11,9 +11,9 @@ module mux2(sel, data0, data1, data_out);
 	always @(data0, data1, sel)
 	begin
 		if (sel)
-			data_out = data0;
-		else
 			data_out = data1;
+		else
+			data_out = data0;
 	end
 	
 endmodule

@@ -2,7 +2,7 @@ module Reg_ID_EX(
 		input 		clk,
 		input		[1:0] WB,
 		input		[2:0] M,
-		input		[2:0] EX,
+		input		[3:0] EX,
 		input		[7:0] PC,
 		input		[31:0] instruction,
 		input		[31:0] reg1, reg2, sign_extend,

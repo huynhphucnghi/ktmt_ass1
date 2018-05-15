@@ -10,7 +10,7 @@ module Reg_ID_EX(
 		input		[4:0] rt, rd,
 		output reg	[1:0] _WB,
 		output reg	[2:0] _M,
-		output reg	[2:0] _EX,
+		output reg	[3:0] _EX,
 		output reg	[7:0] _PC,
 		output reg	[31:0] _instruction,
 		output reg	[31:0] _reg1, _reg2, _sign_extend,
@@ -21,7 +21,7 @@ module Reg_ID_EX(
 	initial begin
 		_WB = 2'b0;
 		_M = 3'b0;
-		_EX = 3'b0;
+		_EX = 4'b0;
 		_PC = 8'b0;
 		_instruction = 32'b0;
 		_reg1 = 32'b0; _reg2 = 32'b0;

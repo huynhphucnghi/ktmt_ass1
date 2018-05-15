@@ -9,8 +9,8 @@ system _system(
 			!KEY[0],
 			KEY[1],
 			KEY[2],
-			SW[10:3],
-			SW[17:10],
+			8'b0,
+			SW[7:0],
 			{LEDR, LEDG}
 );
 

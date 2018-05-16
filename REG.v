@@ -14,7 +14,7 @@ module REG(
 	assign REG_data_out1 = (REG_address_1==0) ? 32'b0 : regr[REG_address_1];
 	assign REG_data_out2 = (REG_address_2==0) ? 32'b0 : regr[REG_address_2];
 
-	always@(negedge clk)
+	always@(posedge clk)
 	begin
 		if (REG_write_1)
 			begin

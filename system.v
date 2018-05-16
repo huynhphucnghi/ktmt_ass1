@@ -46,11 +46,10 @@ Reg_IF_ID _Reg_IF_ID(
 
 // Instruction Decode (ID)
 wire [10:0] control_signal;
-wire [5:0] opcode, funct;
+wire [5:0] opcode;
 wire [4:0] rs, rt, rd;
 wire [31:0] sign_extend;
 assign opcode 			= instruction_ID[31:26];
-assign funct			= instruction_ID[5:0];
 assign rs 				= instruction_ID[25:21];
 assign rt 				= instruction_ID[20:16];
 assign rd 				= instruction_ID[15:11];
@@ -94,7 +93,6 @@ wire [31:0]	instruction_EX;
 wire [31:0]	reg_data1_EX;
 wire [31:0]	reg_data2_EX; 
 wire [31:0]	sign_extend_EX;
-wire [5:0]	funct_EX;
 wire [4:0]	rt_EX, rd_EX;
 Reg_ID_EX _Reg_ID_EX(
 		SYS_clk,
@@ -105,7 +103,6 @@ Reg_ID_EX _Reg_ID_EX(
 		PC_ID,
 		instruction_ID,
 		reg_data1, reg_data2, sign_extend,
-		funct,
 		rt, rd,
 		// output
 		{RegWrite_EX, Mem2Reg_EX},
@@ -114,7 +111,6 @@ Reg_ID_EX _Reg_ID_EX(
 		PC_EX,
 		instruction_EX,
 		reg_data1_EX, reg_data2_EX, sign_extend_EX,
-		funct_EX,
 		rt_EX, rd_EX,
 );
 
@@ -139,9 +135,11 @@ mux2 mux2_EX_2(
 
 // ALU_control
 wire [3:0] ALU_control_signal;
+wire [5:0] funct;
+assign funct			= sign_extend_EX[5:0];
 ALU_control _ALU_control(
 	ALUop_EX,
-	funct_EX,
+	funct,
 	ALU_control_signal
 );
 
@@ -154,6 +152,7 @@ ALU _ALU(
 	ALU_control_signal,
 	source_data1,
 	source_data2,
+	shamt,
 	ALU_result,
 	ALU_status
 );

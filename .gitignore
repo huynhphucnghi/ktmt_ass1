@@ -11,3 +11,5 @@ output_files/
 *.cmp
 *.inc
 *.qip
+greybox_tmp/
+transcript

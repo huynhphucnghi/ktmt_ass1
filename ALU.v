@@ -2,6 +2,7 @@ module ALU(
 		input 		[3:0] ALU_control,
 		input		[31:0] ALU_operand_1,
 		input		[31:0] ALU_operand_2,
+		input		[4:0] ALU_shamt,
 		output reg	[31:0] ALU_result,
 		output		[7:0] ALU_status
 );
@@ -60,6 +61,12 @@ module ALU(
 					overflow = 1'b0;
 					carry = 1'b0;
 				end	
+		4'b1110:	begin	//	sll
+					ALU_result = ALU_operand_1 << ALU_shamt;
+					zero = (ALU_result == 32'b0);
+					overflow = 1'b0;
+					carry = 1'b0;
+				end
 		default:	begin	// 
 					ALU_result = ALU_result;	
 					zero = zero;
@@ -75,3 +82,4 @@ module ALU(
 	assign ALU_status = {zero, overflow, carry, negative, invalid_address, div_zero, 2'b00};
 	
 endmodule
+

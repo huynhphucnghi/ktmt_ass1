@@ -15,12 +15,12 @@ module Reg_IF_ID(
 	always@(posedge clk)
 	begin
 		if(unvalid_PC) begin
-			_PC <= 8'b0;
-			_instruction <= 32'b0;
+			_PC <= PC;
+			_instruction <= instruction;
 		end
 		else begin
 			_PC <= PC;
-			_instruction <= instruction;
+			_instruction <= 32'b0;
 		end
 	end
 

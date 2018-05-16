@@ -71,14 +71,14 @@ wire Jump 			= control_signal[10];
 // Register Files
 wire [31:0] reg_data1, reg_data2;
 REG _REG(
-		SYS_clk,
-		rs,
-		rt,
-		rd,
-		1'b0,
-		32'b0,
-		reg_data1,
-		reg_data2
+		.clk(SYS_clk),
+		.REG_address_1(rs),
+		.REG_address_2(rt),
+		.REG_address_wr(RegDst_address_WB),
+		.REG_write_1(RegWrite_WB),
+		.REG_data_wb_in1(Reg_write_data),
+		.REG_data_out1(reg_data1),
+		.REG_data_out2(reg_data2)
 );
 
 // ID/EX
@@ -113,13 +113,13 @@ Reg_ID_EX _Reg_ID_EX(
 		rt_EX, rd_EX,
 );
 
-// Select register write's destination
-wire [4:0] reg_write;
+// Select register destination address
+wire [4:0] RegDst_address;
 mux2 mux2_EX_1(
 	RegDst_EX,
 	rt_EX,
 	rd_EX,
-	reg_write
+	RegDst_address
 );
 
 // Select ALU source
@@ -146,30 +146,96 @@ wire [7:0] ALU_status;
 ALU _ALU(
 	ALU_control_signal,
 	source_data1,
-	source_data1,
+	source_data2,
 	ALU_result,
 	ALU_status
 );
 
+// EX/MEM
+wire 	RegWrite_MEM, Mem2Reg_MEM, MemWrite_MEM, MemRead_MEM, Branch_MEM; 
+wire [7:0] ALU_status_MEM;
+wire [31:0] ALU_result_MEM, write_data, write_data_MEM;
+wire [4:0] RegDst_address_MEM;
+assign write_data = reg_data2_EX;
+Reg_EX_MEM _Reg_EX_MEM(
+		SYS_clk,
+		// input
+		{RegWrite_EX, Mem2Reg_EX},
+		{MemWrite_EX, MemRead_EX, Branch_EX},
+		ALU_status,
+		ALU_result,
+		write_data,
+		RegDst_address,
+		1'b0,
+		// output
+		{RegWrite_MEM, Mem2Reg_MEM},
+		{MemWrite_MEM, MemRead_MEM, Branch_MEM},
+		ALU_status_MEM,
+		ALU_result_MEM,
+		write_data_MEM,
+		RegDst_address_MEM
+);
+
+// Data memory
+wire [31:0] read_data;
+DMEM _DMEM(
+		.clk(SYS_clk),
+		.DMEM_address(ALU_result_MEM),
+		.DMEM_data_in(write_data_MEM),
+		.DMEM_mem_write(MemWrite_MEM),
+		.DMEM_mem_read(MemRead_MEM),
+		.DMEM_data_out(read_data)
+);
+
+// MEM/WB
+wire RegWrite_WB, Mem2Reg_WB;
+wire [31:0] read_data_WB, ALU_result_WB;
+wire [4:0] RegDst_address_WB;
+Reg_MEM_WB _Reg_MEM_WB(
+		.clk(SYS_clk),
+		// input
+		.WB({RegWrite_MEM, Mem2Reg_MEM}),
+		.read_data(read_data),
+		.ALU_result(ALU_result_MEM),
+		.RegDst_address(RegDst_address_MEM),
+		// output
+		._WB({RegWrite_WB, Mem2Reg_WB}),
+		._read_data(read_data_WB),
+		._ALU_result(ALU_result_WB),
+		._RegDst_address(RegDst_address_WB)
+);
+
+//Select data to write back to register files
+wire [31:0] Reg_write_data;
+mux2 mux2_WB(
+	Mem2Reg_WB,
+	ALU_result_WB,
+	read_data_WB,
+	Reg_write_data
+);
+
 // Display result on leds
+initial begin
+	SYS_leds = 27'b0;
+end
 always @(SYS_output_sel) begin
 	if(SYS_output_sel == 8'd0) begin
-		SYS_leds <= reg_data1;
+		SYS_leds = reg_data1;
 	end
 	else if(SYS_output_sel == 8'd1) begin
-		SYS_leds <= reg_data2;
+		SYS_leds = reg_data2;
 	end
 	else if(SYS_output_sel == 8'd2) begin
-		SYS_leds <= sign_extend;
+		SYS_leds = sign_extend;
 	end
 	else if(SYS_output_sel == 8'd3) begin
-		SYS_leds <= {control_signal, 16'b0};
+		SYS_leds = {control_signal, 16'b0};
 	end
 	else if(SYS_output_sel == 8'd4) begin
-		SYS_leds <= ALU_result;
+		SYS_leds = ALU_result;
 	end
 	else begin
-		SYS_leds <= SYS_leds;
+		SYS_leds = SYS_leds;
 	end
 end
 endmodule

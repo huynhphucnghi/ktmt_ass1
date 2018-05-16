@@ -2,7 +2,7 @@ module Reg_IF_ID(
 		input 		clk,
 		input		[7:0] PC,
 		input		[31:0] instruction,
-		input		unvalid_PC,
+		input		valid_PC,
 		output reg	[7:0] _PC,
 		output reg	[31:0] _instruction
 );
@@ -14,7 +14,7 @@ module Reg_IF_ID(
 
 	always@(posedge clk)
 	begin
-		if(unvalid_PC) begin
+		if(valid_PC) begin
 			_PC <= PC;
 			_instruction <= instruction;
 		end

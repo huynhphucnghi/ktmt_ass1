@@ -1,4 +1,4 @@
-module control(
+	module control(
 		input		[5:0] opcode,
 		output reg	[10:0] control_signal
 );
@@ -28,6 +28,8 @@ module control(
 				control_signal = 11'b00000000110;
 			6'd0  :	// R-type
 				control_signal = 11'b000001x0011;
+			6'd2  :	// Jump
+				control_signal = 11'b10000000000;
 			default:	// 
 				control_signal = 11'b00000001000;
 		endcase

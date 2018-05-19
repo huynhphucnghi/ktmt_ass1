@@ -18,7 +18,9 @@ module ALU_control(
 					6'b101010:	ALU_control = 4'b0111;	// slt
 					6'b100111:	ALU_control = 4'b1100;	// nor
 					6'b000000:	ALU_control = 4'b1110;	// sll
-					6'b000010:	ALU_control = 4'b1111;	//	slr
+					6'b000010:	ALU_control = 4'b1111;	// slr
+					6'b011000:	ALU_control = 4'b0011;	// mul
+					6'b011010:	ALU_control = 4'b0100;	// div
 					default: 		ALU_control = ALU_control;
 					endcase
 				end

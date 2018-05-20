@@ -7,8 +7,8 @@ module system_interface(
 
 system _system(
 			!KEY[0],
-			KEY[1],
-			KEY[2],
+			!KEY[1],
+			!KEY[2],
 			8'b0,
 			SW[7:0],
 			{LEDR, LEDG}

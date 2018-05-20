@@ -4,13 +4,35 @@ module system(
 			input		SYS_load,
 			input [7:0]	SYS_pc_val,
 			input [7:0]	SYS_output_sel,
-			output reg [26:0]	SYS_leds
+			output reg [31:0]	SYS_leds
 );
 
 // Instruction Fetch (IF)
-reg [7:0] PC = 8'b0;
-wire [7:0] nextPC;
-wire branch;
+wire [7:0] PC, next_PC;
+wire [7:0] Branch_addr_MEM;
+wire [7:0] ALU_status_MEM;
+wire branch, Branch_MEM;
+
+assign branch = Branch_MEM && ALU_status_MEM[7];
+
+mux2 mux2_IF(
+	branch,
+	PC + 8'b1,
+	Branch_addr_MEM,
+	next_PC
+);
+
+PC_register _PC_register(
+	.clk(SYS_clk), 
+	.reset(SYS_reset), 
+	.load(SYS_load),
+	.PC_load_val(SYS_pc_val),
+	.branch(branch),
+	.PC_next_val(next_PC),
+	.PC(PC)
+);
+
+// Instruction memory
 wire [31:0] instruction;
 IMEM _IMEM(
 	{24'b0, PC},
@@ -19,27 +41,17 @@ IMEM _IMEM(
 	1'b0,
 	instruction
 );
-assign nextPC = PC + 1'b1;
-assign branch = Branch_MEM && ALU_status[7];
-always @(posedge SYS_clk) begin
-	if(SYS_reset == 1) begin
-		PC <= nextPC;
-	end
-	else if(branch) begin
-		PC <= Branch_addr_MEM;
-	end
-	else begin
-		PC <= 8'b0;
-	end
-end
+
 
 // IF/ID
 wire [31:0] instruction_ID;
 wire [7:0] PC_ID;
+wire valid_PC;
 Reg_IF_ID _Reg_IF_ID(
 	SYS_clk,
-	nextPC,
+	PC,
 	instruction,
+	1'b1,
 	PC_ID,
 	instruction_ID
 );
@@ -74,8 +86,11 @@ wire Jump 			= control_signal[10];
 
 // Register Files
 wire [31:0] reg_data1, reg_data2;
+wire RegWrite_WB;
+wire [4:0] RegDst_address_WB;
+wire [31:0] Reg_write_data;
 REG _REG(
-		.clk(SYS_clk),
+		.clk(!SYS_clk),
 		.REG_address_1(rs),
 		.REG_address_2(rt),
 		.REG_address_wr(RegDst_address_WB),
@@ -111,7 +126,7 @@ Reg_ID_EX _Reg_ID_EX(
 		PC_EX,
 		instruction_EX,
 		reg_data1_EX, reg_data2_EX, sign_extend_EX,
-		rt_EX, rd_EX,
+		rt_EX, rd_EX
 );
 
 // Select register destination address
@@ -145,8 +160,8 @@ ALU_control _ALU_control(
 
 // ALU
 wire [4:0] shamt;
-wire [31:0] ALU_result;
 wire [7:0] ALU_status;
+wire [31:0] ALU_result;
 assign shamt = sign_extend_EX[10:6];
 ALU _ALU(
 	ALU_control_signal,
@@ -162,8 +177,7 @@ wire [7:0] Branch_addr;
 assign Branch_addr = sign_extend_EX + PC_EX;
 
 // EX/MEM
-wire 	RegWrite_MEM, Mem2Reg_MEM, MemWrite_MEM, MemRead_MEM, Branch_MEM; 
-wire [7:0] ALU_status_MEM, Branch_addr_MEM;
+wire 	RegWrite_MEM, Mem2Reg_MEM, MemWrite_MEM, MemRead_MEM; 
 wire [31:0] ALU_result_MEM, write_data, write_data_MEM;
 wire [4:0] RegDst_address_MEM;
 assign write_data = reg_data2_EX;
@@ -200,9 +214,8 @@ DMEM _DMEM(
 );
 
 // MEM/WB
-wire RegWrite_WB, Mem2Reg_WB;
+wire Mem2Reg_WB;
 wire [31:0] read_data_WB, ALU_result_WB;
-wire [4:0] RegDst_address_WB;
 Reg_MEM_WB _Reg_MEM_WB(
 		.clk(SYS_clk),
 		// input
@@ -218,7 +231,6 @@ Reg_MEM_WB _Reg_MEM_WB(
 );
 
 //Select data to write back to register files
-wire [31:0] Reg_write_data;
 mux2 mux2_WB(
 	Mem2Reg_WB,
 	ALU_result_WB,
@@ -231,7 +243,6 @@ initial begin
 	SYS_leds = 27'b0;
 end
 always @(SYS_output_sel) begin
-	SYS_leds = SYS_leds;
 	if(SYS_output_sel == 8'h0) begin
 		SYS_leds = instruction;
 	end
@@ -260,7 +271,10 @@ always @(SYS_output_sel) begin
 		SYS_leds = reg_data2;
 	end
 	else if(SYS_output_sel == 8'h82) begin
-		SYS_leds = {16'b0, RegWrite_WB, Mem2Reg_WB, 9'b0};
+		SYS_leds = { RegDst_address_WB, 11'b0, RegWrite_WB, Mem2Reg_WB, 9'b0};
+	end
+	else begin
+		SYS_leds = 27'b0;
 	end
 end
 endmodule

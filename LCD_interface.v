@@ -10,7 +10,7 @@ module LCD_interface(
 	
 	LCD_controller(
 		CLOCK_50, 
-		!KEY[0], KEY[1], KEY[2], SW[7:0], SW[11:8], 
+		!KEY[0], !KEY[1], !KEY[2], SW[7:0], SW[11:8], 
 		LCD_RS, LCD_RW, LCD_EN, LCD_DATA[7:0], LEDG[0], LEDG[1], LEDR[3:0]
 	);
 	

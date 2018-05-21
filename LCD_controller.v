@@ -21,7 +21,7 @@ module LCD_controller(
 	wire [7:0]PC_present;
 	LCD_command command(op_cmd, PC_present, Out_sel, data_cmd, rdy_exe, {op_exe, data_exe}, rdy_cmd, state);
 	LCD_executor executor(clk, enb_exe, rst_exe, op_exe, data_exe, LCD_RS, LCD_RW, LCD_EN, LCD_DATA, rdy_exe);
-	system system(sys_clk, rst, load, PC, Out_sel, PC_present, data_cmd);
+	system system(sys_clk, clk, rst, load, PC, Out_sel, PC_present, data_cmd);
 	// Data
 	
 	

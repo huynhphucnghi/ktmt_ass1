@@ -10,11 +10,8 @@ module PC_register(
 		PC = 8'b0;
 	end
 	
-	always@(negedge clk) begin
-		if(load) begin
-			PC <= PC_load_val;
-		end
-		else if(reset) begin
+	always@(posedge clk, negedge reset) begin
+		if(!reset) begin
 			PC <= 8'b0;
 		end
 		else if(stall) begin

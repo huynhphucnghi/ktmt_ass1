@@ -1,7 +1,7 @@
 module Data_hazard(
 	input 		[4:0] IF_ID_rs, IF_ID_rt,
 	input 		[4:0] ID_EX_rt,
-	input		ID_EX_mem_read,
+	input			ID_EX_mem_read,
 	output 	 	load_hazard_signal
 );
 

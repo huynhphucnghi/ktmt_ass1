@@ -9,7 +9,10 @@ module system(
 			output reg [31:0]	SYS_leds
 );
 
+////////////////////////////////////////////
 // Instruction Fetch (IF)
+////////////////////////////////////////////
+
 wire [7:0] next_PC;
 wire [7:0] Branch_addr_MEM;
 wire [7:0] ALU_status_MEM;
@@ -38,7 +41,7 @@ PC_register _PC_register(
 	.load(SYS_load),
 	.PC_load_val(SYS_pc_val),
 	.branch(branch),
-	.stall(1'b0),
+	.stall(load_hazard_signal),
 	.PC_next_val(next_PC_final),
 	.PC(PC)
 );
@@ -53,22 +56,32 @@ IMEM _IMEM(
 	instruction
 );
 
+// EPC
+wire PC_valid;
+EPC _EPC(
+		.PC(PC),
+		.PC_valid(PC_valid)
+);
+
 
 // IF/ID
 wire [31:0] instruction_ID;
 wire [7:0] PC_ID;
-wire valid_PC;
 Reg_IF_ID _Reg_IF_ID(
-	SYS_clk,
-	PC,
-	instruction,
-	1'b1,
-	Jump,
-	PC_ID,
-	instruction_ID
+	.clk(SYS_clk),
+	.PC(PC),
+	.instruction(instruction),
+	.valid_PC(PC_valid),
+	.flush(Jump),
+	.stall(load_hazard_signal),
+	._PC(PC_ID),
+	._instruction(instruction_ID)
 );
 
+////////////////////////////////////////////
 // Instruction Decode (ID)
+////////////////////////////////////////////
+
 wire [10:0] control_signal;
 wire [5:0] opcode;
 wire [4:0] rs, rt, rd;
@@ -114,6 +127,27 @@ REG _REG(
 		.REG_data_out2(reg_data2)
 );
 
+// Load-use data hazard
+wire load_hazard_signal;
+Data_hazard _Data_hazard(
+	.IF_ID_rs(rs), 
+	.IF_ID_rt(rt),
+	.ID_EX_rt(rt_EX),
+	.ID_EX_mem_read(MemRead_EX),
+	.load_hazard_signal(load_hazard_signal)
+);
+
+// Mux to handle load-use data hazard
+wire [8:0] WB_M_EX;
+mux2 mux2_load_use(
+	load_hazard_signal,
+	{ 	RegWrite, Mem2Reg, 
+		MemWrite, MemRead, Branch,
+		RegDst, ALUsrc, ALUop	},
+	9'b0,
+	WB_M_EX
+);
+
 // ID/EX
 wire 			RegDst_EX, RegWrite_EX, Mem2Reg_EX, MemWrite_EX, MemRead_EX, Branch_EX, ALUsrc_EX; 
 wire [1:0]	ALUop_EX;
@@ -126,9 +160,9 @@ wire [4:0]	rs_EX, rt_EX, rd_EX;
 Reg_ID_EX _Reg_ID_EX(
 		SYS_clk,
 		// input
-		{RegWrite, Mem2Reg},
-		{MemWrite, MemRead, Branch},
-		{RegDst, ALUsrc, ALUop},
+		WB_M_EX[8:7],
+		WB_M_EX[6:4],
+		WB_M_EX[3:0],
 		PC_ID,
 		instruction_ID,
 		reg_data1, reg_data2, sign_extend,
@@ -143,6 +177,10 @@ Reg_ID_EX _Reg_ID_EX(
 		rs_EX, rt_EX, rd_EX
 );
 
+////////////////////////////////////////////
+// Execute (EXE)
+////////////////////////////////////////////
+
 // Select register destination address
 wire [4:0] RegDst_address;
 mux2 mux2_EX_1(
@@ -154,8 +192,8 @@ mux2 mux2_EX_1(
 
 // Select ALU source
 wire [31:0] source_data1, source_data2, mux3_data1, mux3_data2;
-assign mux3_data1 = (F1 == 2'b00) ? reg_data1_EX : ((F1 == 2'b01) ? ALU_result_MEM : ALU_result_WB);
-assign mux3_data2 = (F2 == 2'b00) ? reg_data2_EX : ((F2 == 2'b01) ? ALU_result_MEM : ALU_result_WB);
+assign mux3_data1 = (F1 == 2'b00) ? reg_data1_EX : ((F1 == 2'b01) ? ALU_result_MEM : Reg_write_data);
+assign mux3_data2 = (F2 == 2'b00) ? reg_data2_EX : ((F2 == 2'b01) ? ALU_result_MEM : Reg_write_data);
 assign source_data1 = mux3_data1;
 mux2 mux2_EX_2(
 	ALUsrc_EX,
@@ -227,6 +265,10 @@ Reg_EX_MEM _Reg_EX_MEM(
 		Branch_addr_MEM
 );
 
+////////////////////////////////////////////
+// Memory (MEM)
+////////////////////////////////////////////
+
 // Data memory
 wire [31:0] read_data;
 DMEM _DMEM(
@@ -254,6 +296,10 @@ Reg_MEM_WB _Reg_MEM_WB(
 		._ALU_result(ALU_result_WB),
 		._RegDst_address(RegDst_address_WB)
 );
+
+////////////////////////////////////////////
+// Write Back (WB)
+////////////////////////////////////////////
 
 //Select data to write back to register files
 mux2 mux2_WB(

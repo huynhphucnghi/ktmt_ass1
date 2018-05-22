@@ -4,6 +4,7 @@ module Reg_IF_ID(
 		input		[31:0] instruction,
 		input		valid_PC,
 		input		flush,
+		input		stall,
 		output reg	[7:0] _PC,
 		output reg	[31:0] _instruction
 );
@@ -15,7 +16,11 @@ module Reg_IF_ID(
 
 	always@(posedge clk)
 	begin
-		if(valid_PC && !flush) begin
+		if(stall) begin
+			_PC <= _PC;
+			_instruction <= _instruction;
+		end
+		else if(valid_PC && !flush) begin
 			_PC <= PC;
 			_instruction <= instruction;
 		end

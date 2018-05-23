@@ -5,7 +5,7 @@ module exception_handle(
 		output reg	disable_signal
 );
 	
-	always@(ALU_status, RegDst_address)
+	always@(*)
 	begin
 		disable_signal = ALU_status[6] || ALU_status[2] || 
 						RegDst_address == 5'b0 ||

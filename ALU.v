@@ -6,17 +6,10 @@ module ALU(
 		output reg	[31:0] ALU_result,
 		output		[7:0] ALU_status
 );
-	reg zero, overflow, carry, negative, invalid_address, div_zero;
-	initial begin
-		zero = 0;
-		overflow = 0;
-		carry = 0;
-		negative = 0;
-		invalid_address = 0;
-		div_zero = 0;
-	end
+	reg zero, overflow, carry;
+	wire negative, invalid_address, div_zero;
 
-	always@(ALU_control, ALU_operand_1, ALU_operand_2)
+	always@(ALU_control, ALU_operand_1, ALU_operand_2, ALU_shamt)
 	begin
 		case (ALU_control)
 		4'b0000:	begin	// and
@@ -86,16 +79,16 @@ module ALU(
 					carry = 1'b0;
 				end
 		default:	begin	// 
-					ALU_result = ALU_result;	
-					zero = zero;
-					overflow = overflow;
-					carry = carry;
+					ALU_result = 32'b0;	
+					zero = 1'b0;
+					overflow = 1'b0;
+					carry = 1'b0;
 				end	
 		endcase
-		negative = ALU_result[31];
-		invalid_address = ~(ALU_result[0] == 0 && ALU_result[1] == 0);
-		div_zero = (ALU_control == 4'b0100 && ALU_operand_2 == 32'b0);
 	end
+	assign negative = ALU_result[31];
+	assign invalid_address = ALU_result[0] || ALU_result[1];
+	assign div_zero = (ALU_control == 4'b0100 && ALU_operand_2 == 32'b0);
 	
 	assign ALU_status = {zero, overflow, carry, negative, invalid_address, div_zero, 2'b00};
 	

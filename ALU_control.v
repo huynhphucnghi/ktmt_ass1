@@ -21,10 +21,10 @@ module ALU_control(
 					6'b000010:	ALU_control = 4'b1111;	// slr
 					6'b011000:	ALU_control = 4'b0011;	// mul
 					6'b011010:	ALU_control = 4'b0100;	// div
-					default: 		ALU_control = ALU_control;
+					default: 		ALU_control = 4'b0;
 					endcase
 				end
-		default:	ALU_control = ALU_control;
+		default:	ALU_control = 4'b0;
 		endcase
 	end
 endmodule

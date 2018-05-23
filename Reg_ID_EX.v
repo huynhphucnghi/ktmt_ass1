@@ -1,7 +1,7 @@
 module Reg_ID_EX(
 		input 		clk,
 		input		[1:0] WB,
-		input		[2:0] M,
+		input		[1:0] M,
 		input		[3:0] EX,
 		input		[7:0] PC,
 		input		[31:0] instruction,
@@ -18,7 +18,7 @@ module Reg_ID_EX(
 
 	initial begin
 		_WB = 2'b0;
-		_M = 3'b0;
+		_M = 2'b0;
 		_EX = 4'b0;
 		_PC = 8'b0;
 		_instruction = 32'b0;

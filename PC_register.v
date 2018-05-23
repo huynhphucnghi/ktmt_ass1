@@ -1,7 +1,7 @@
 module PC_register(
 	input 		clk, reset, load,
 	input [7:0] PC_load_val,
-	input 		branch, stall,
+	input 		stall,
 	input [7:0] PC_next_val,
 	output reg [7:0] 	PC
 );

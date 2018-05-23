@@ -13,21 +13,15 @@ module system(
 // Instruction Fetch (IF)
 ////////////////////////////////////////////
 
-wire [7:0] next_PC;
-wire [7:0] Branch_addr_MEM;
-wire [7:0] ALU_status_MEM;
-wire branch, Branch_MEM;
-
-assign branch = Branch_MEM && ALU_status_MEM[7];
-
+wire [7:0] PC_4, next_PC, next_PC_final;
+assign PC_4 = PC + 8'd4;
 mux2 mux2_branch(
-	branch,
-	PC + 8'd4,
-	Branch_addr_MEM,
+	Branch,
+	PC_4,
+	Branch_addr,
 	next_PC
 );
 
-wire [7:0] next_PC_final;
 mux2 mux2_jump(
 	Jump,
 	next_PC,
@@ -40,7 +34,6 @@ PC_register _PC_register(
 	.reset(SYS_reset), 
 	.load(SYS_load),
 	.PC_load_val(SYS_pc_val),
-	.branch(branch),
 	.stall(load_hazard_signal),
 	.PC_next_val(next_PC_final),
 	.PC(PC)
@@ -69,10 +62,10 @@ wire [31:0] instruction_ID;
 wire [7:0] PC_ID;
 Reg_IF_ID _Reg_IF_ID(
 	.clk(SYS_clk),
-	.PC(PC),
+	.PC(PC_4),
 	.instruction(instruction),
 	.valid_PC(PC_valid),
-	.flush(Jump),
+	.flush(Jump || Branch),
 	.stall(load_hazard_signal),
 	._PC(PC_ID),
 	._instruction(instruction_ID)
@@ -96,6 +89,7 @@ assign jump_addr		= { 4'b0, instruction_ID[25:0], 2'b0 };
 
 control _control(
 		opcode,
+		two_reg_are_equal,
 		control_signal
 );
 
@@ -138,14 +132,36 @@ Data_hazard _Data_hazard(
 );
 
 // Mux to handle load-use data hazard
-wire [8:0] WB_M_EX;
+wire [7:0] WB_M_EX;
 mux2 mux2_load_use(
 	load_hazard_signal,
 	{ 	RegWrite, Mem2Reg, 
-		MemWrite, MemRead, Branch,
+		MemWrite, MemRead,
 		RegDst, ALUsrc, ALUop	},
-	9'b0,
+	8'b0,
 	WB_M_EX
+);
+
+// Early calculate branch address at ID phase
+wire [31:0] real_reg_data1 = F[0] ? ALU_result : reg_data1;
+wire [31:0] real_reg_data2 = F[1] ? ALU_result : reg_data2;
+wire two_reg_are_equal = (real_reg_data1 == real_reg_data2) ? 1'b1 : 1'b0;
+// Calculate branch address
+wire [7:0] Branch_addr;
+assign Branch_addr = {sign_extend[29:0], 2'b0} + PC_ID;
+
+// Handle hazard when execute
+// For example:
+// addi $s0, $s0, 12
+// beq $s0, $s1, 16
+// This will not happen if we didn't calculate branch address early.
+wire [1:0] F;
+Control_Forwarding _Control_Forwarding(
+	.ID_EX_RegWrite(RegWrite_EX),
+	.ID_EX_rd(RegDst_address),
+	.IF_ID_rs(rs),
+	.IF_ID_rt(rt),
+	.F(F)
 );
 
 // ID/EX
@@ -160,8 +176,8 @@ wire [4:0]	rs_EX, rt_EX, rd_EX;
 Reg_ID_EX _Reg_ID_EX(
 		SYS_clk,
 		// input
-		WB_M_EX[8:7],
-		WB_M_EX[6:4],
+		WB_M_EX[7:6],
+		WB_M_EX[5:4],
 		WB_M_EX[3:0],
 		PC_ID,
 		instruction_ID,
@@ -169,7 +185,7 @@ Reg_ID_EX _Reg_ID_EX(
 		rs, rt, rd,
 		// output
 		{RegWrite_EX, Mem2Reg_EX},
-		{MemWrite_EX, MemRead_EX, Branch_EX},
+		{MemWrite_EX, MemRead_EX},
 		{RegDst_EX, ALUsrc_EX, ALUop_EX},
 		PC_EX,
 		instruction_EX,
@@ -226,10 +242,6 @@ ALU _ALU(
 	ALU_status
 );
 
-// Calculate branch address
-wire [7:0] Branch_addr;
-assign Branch_addr = sign_extend_EX + PC_EX;
-
 // Exception handle
 wire disable_signal;
 exception_handle _exception_handle(
@@ -243,26 +255,25 @@ exception_handle _exception_handle(
 wire 	RegWrite_MEM, Mem2Reg_MEM, MemWrite_MEM, MemRead_MEM; 
 wire [31:0] ALU_result_MEM, write_data, write_data_MEM;
 wire [4:0] RegDst_address_MEM;
+wire [7:0] ALU_status_MEM;
 assign write_data = reg_data2_EX;
 Reg_EX_MEM _Reg_EX_MEM(
 		SYS_clk,
 		// input
 		{RegWrite_EX, Mem2Reg_EX},
-		{MemWrite_EX, MemRead_EX, Branch_EX},
+		{MemWrite_EX, MemRead_EX},
 		ALU_status,
 		ALU_result,
 		write_data,
 		RegDst_address,
-		Branch_addr,
 		disable_signal,
 		// output
 		{RegWrite_MEM, Mem2Reg_MEM},
-		{MemWrite_MEM, MemRead_MEM, Branch_MEM},
+		{MemWrite_MEM, MemRead_MEM},
 		ALU_status_MEM,
 		ALU_result_MEM,
 		write_data_MEM,
 		RegDst_address_MEM,
-		Branch_addr_MEM
 );
 
 ////////////////////////////////////////////

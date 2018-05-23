@@ -11,5 +11,6 @@ output_files/
 *.cmp
 *.inc
 *.qip
+*.qws
 greybox_tmp/
 transcript

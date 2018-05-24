@@ -207,6 +207,7 @@ mux2 mux2_EX_1(
 );
 
 // Select ALU source
+// Handle data hazard by forwarding (See Forwarding module below)
 wire [31:0] source_data1, source_data2, mux3_data1, mux3_data2;
 assign mux3_data1 = (F1 == 2'b00) ? reg_data1_EX : ((F1 == 2'b01) ? ALU_result_MEM : Reg_write_data);
 assign mux3_data2 = (F2 == 2'b00) ? reg_data2_EX : ((F2 == 2'b01) ? ALU_result_MEM : Reg_write_data);
@@ -256,7 +257,7 @@ wire 	RegWrite_MEM, Mem2Reg_MEM, MemWrite_MEM, MemRead_MEM;
 wire [31:0] ALU_result_MEM, write_data, write_data_MEM;
 wire [4:0] RegDst_address_MEM;
 wire [7:0] ALU_status_MEM;
-assign write_data = reg_data2_EX;
+assign write_data = (F3 == 2'b00) ? reg_data2_EX : ((F3 == 2'b01) ? ALU_result_MEM : Reg_write_data);
 Reg_EX_MEM _Reg_EX_MEM(
 		SYS_clk,
 		// input
@@ -321,7 +322,7 @@ mux2 mux2_WB(
 );
 
 // Data Forwarding
-wire [1:0] F1, F2;
+wire [1:0] F1, F2, F3;
 Forwarding _Forwarding(
 	.ID_EX_rs(rs_EX),
 	.ID_EX_rt(rt_EX),
@@ -329,8 +330,10 @@ Forwarding _Forwarding(
 	.MEM_WB_rd(RegDst_address_WB),
 	.EX_MEM_RegWrite(RegWrite_MEM),
 	.MEM_WB_RegWrite(RegWrite_WB),
+	.ID_EX_MemWrite(MemWrite_EX),
 	.F1(F1),
-	.F2(F2)
+	.F2(F2),
+	.F3(F3)
 );
 
 // Display result on leds
@@ -362,6 +365,9 @@ always @(SYS_output_sel) begin
 	else if(SYS_output_sel == 8'h7) begin
 		SYS_leds = {10'b0, PC, 9'b0};
 	end
+	else if(SYS_output_sel == 8'h8) begin
+		SYS_leds = {17'b0, disable_signal, 9'b0};
+	end
 	else if(SYS_output_sel == 8'h81) begin
 		SYS_leds = reg_data2;
 	end
@@ -369,7 +375,7 @@ always @(SYS_output_sel) begin
 		SYS_leds = { RegDst_address_WB, 11'b0, RegWrite_WB, Mem2Reg_WB, 9'b0};
 	end
 	else if(SYS_output_sel == 8'h83) begin
-		SYS_leds = { F1, F2 };
+		SYS_leds = {  F3, F1, F2 };
 	end
 	else begin
 		SYS_leds = 27'b0;

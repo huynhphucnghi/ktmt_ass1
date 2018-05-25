@@ -107,9 +107,6 @@ wire Jump 			= control_signal[10];
 
 // Register Files
 wire [31:0] reg_data1, reg_data2;
-wire RegWrite_WB;
-wire [4:0] RegDst_address_WB;
-wire [31:0] Reg_write_data;
 REG _REG(
 		.clk(SYS_clk),
 		.REG_address_1(rs),
@@ -143,9 +140,13 @@ mux2 mux2_load_use(
 );
 
 // Early calculate branch address at ID phase
-wire [31:0] real_reg_data1 = F[0] ? ALU_result : reg_data1;
-wire [31:0] real_reg_data2 = F[1] ? ALU_result : reg_data2;
-wire two_reg_are_equal = (real_reg_data1 == real_reg_data2) ? 1'b1 : 1'b0;
+wire [31:0] forward_reg_data1 = 	(F1_control == 2'b00) ? reg_data1 : 
+											(F1_control == 2'b01) ? ALU_result : 
+											Mem2Reg_MEM ? read_data : ALU_result_MEM;
+wire [31:0] forward_reg_data2 = 	(F2_control == 2'b00) ? reg_data2 : 
+											(F2_control == 2'b01) ? ALU_result : 
+											Mem2Reg_MEM ? read_data : ALU_result_MEM;
+wire two_reg_are_equal = (forward_reg_data1 == forward_reg_data2) ? 1'b1 : 1'b0;
 // Calculate branch address
 wire [7:0] Branch_addr;
 assign Branch_addr = {sign_extend[29:0], 2'b0} + PC_ID;
@@ -155,13 +156,16 @@ assign Branch_addr = {sign_extend[29:0], 2'b0} + PC_ID;
 // addi $s0, $s0, 12
 // beq $s0, $s1, 16
 // This will not happen if we didn't calculate branch address early.
-wire [1:0] F;
+wire [1:0] F1_control, F2_control;
 Control_Forwarding _Control_Forwarding(
 	.ID_EX_RegWrite(RegWrite_EX),
+	.EX_MEM_RegWrite(RegWrite_MEM),
 	.ID_EX_rd(RegDst_address),
+	.EX_MEM_rd(RegDst_address_MEM),
 	.IF_ID_rs(rs),
 	.IF_ID_rt(rt),
-	.F(F)
+	.F1(F1_control),
+	.F2(F2_control)
 );
 
 // ID/EX
@@ -313,6 +317,9 @@ Reg_MEM_WB _Reg_MEM_WB(
 // Write Back (WB)
 ////////////////////////////////////////////
 
+wire RegWrite_WB;
+wire [4:0] RegDst_address_WB;
+wire [31:0] Reg_write_data;
 //Select data to write back to register files
 mux2 mux2_WB(
 	Mem2Reg_WB,
@@ -341,45 +348,21 @@ initial begin
 	SYS_leds = 27'b0;
 end
 always @(SYS_output_sel) begin
-	if(SYS_output_sel == 8'h0) begin
-		SYS_leds = instruction;
-	end
-	else if(SYS_output_sel == 8'h1) begin
-		SYS_leds = reg_data1;
-	end
-	else if(SYS_output_sel == 8'h2) begin
-		SYS_leds = ALU_result;
-	end
-	else if(SYS_output_sel == 8'h3) begin
-		SYS_leds = {10'b0, ALU_status, 9'b0};
-	end
-	else if(SYS_output_sel == 8'h4) begin
-		SYS_leds = read_data;
-	end
-	else if(SYS_output_sel == 8'h5) begin
-		SYS_leds = {7'b0, control_signal, 9'b0};
-	end
-	else if(SYS_output_sel == 8'h6) begin
-		SYS_leds = {14'b0, ALU_control_signal, 9'b0};
-	end
-	else if(SYS_output_sel == 8'h7) begin
-		SYS_leds = {10'b0, PC, 9'b0};
-	end
-	else if(SYS_output_sel == 8'h8) begin
-		SYS_leds = {17'b0, disable_signal, 9'b0};
-	end
-	else if(SYS_output_sel == 8'h81) begin
-		SYS_leds = reg_data2;
-	end
-	else if(SYS_output_sel == 8'h82) begin
-		SYS_leds = { RegDst_address_WB, 11'b0, RegWrite_WB, Mem2Reg_WB, 9'b0};
-	end
-	else if(SYS_output_sel == 8'h83) begin
-		SYS_leds = {  F3, F1, F2 };
-	end
-	else begin
-		SYS_leds = 27'b0;
-	end
+	case (SYS_output_sel)
+		8'h0: 	SYS_leds = instruction;
+		8'h1: 	SYS_leds = reg_data1;
+		8'h2: 	SYS_leds = ALU_result;
+		8'h3: 	SYS_leds = {10'b0, ALU_status, 9'b0};
+		8'h4: 	SYS_leds = read_data;
+		8'h5: 	SYS_leds = {7'b0, control_signal, 9'b0};
+		8'h6: 	SYS_leds = {14'b0, ALU_control_signal, 9'b0};
+		8'h7: 	SYS_leds = {10'b0, PC, 9'b0};
+		8'h8: 	SYS_leds = {17'b0, disable_signal, 9'b0};
+		8'h81: 	SYS_leds = reg_data2;
+		8'h82: 	SYS_leds = { RegDst_address_WB, 11'b0, RegWrite_WB, Mem2Reg_WB, 9'b0};
+		8'h83: 	SYS_leds = {  F3, F1, F2 };
+		default: SYS_leds = 27'hfffffff;
+	endcase
 end
 
 endmodule

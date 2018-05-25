@@ -78,12 +78,12 @@ module ALU(
 					overflow = 1'b0;
 					carry = 1'b0;
 				end
-		default:	begin	// 
-					ALU_result = 32'b0;	
-					zero = 1'b0;
-					overflow = 1'b0;
-					carry = 1'b0;
-				end	
+//		default:	begin	// 
+//					ALU_result = 32'b0;	
+//					zero = 1'b0;
+//					overflow = 1'b0;
+//					carry = 1'b0;
+//				end	
 		endcase
 	end
 	assign negative = ALU_result[31];

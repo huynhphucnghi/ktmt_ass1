@@ -15,12 +15,15 @@
 // nhưng khác ở chỗ là Control Forwarding sẽ forward dữ liệu từ giai đoạn EX về ID để hỗ trợ lệnh rẽ nhánh có điều kiện.
 
 module Control_Forwarding(
-	input ID_EX_RegWrite,
-	input [4:0] ID_EX_rd, IF_ID_rs, IF_ID_rt,
-	output [1:0] F
+	input ID_EX_RegWrite, EX_MEM_RegWrite,
+	input [4:0] ID_EX_rd, EX_MEM_rd, IF_ID_rs, IF_ID_rt,
+	output [1:0] F1, F2
 );
 
-	assign F[0] = (ID_EX_RegWrite && ID_EX_rd == IF_ID_rs) ? 1'b1 : 1'b0;
-	assign F[1] = (ID_EX_RegWrite && ID_EX_rd == IF_ID_rt) ? 1'b1 : 1'b0;
-
+	assign F1 = (ID_EX_RegWrite && ID_EX_rd != 0 && ID_EX_rd == IF_ID_rs) ? 2'b01 :
+				((EX_MEM_RegWrite && EX_MEM_rd != 0 && EX_MEM_rd == IF_ID_rs) ? 2'b10 :
+				   	2'b00);
+	assign F2 = (ID_EX_RegWrite && ID_EX_rd != 0 && ID_EX_rd == IF_ID_rt)  ? 2'b01 :
+				((EX_MEM_RegWrite && EX_MEM_rd != 0 && EX_MEM_rd == IF_ID_rt) ? 2'b10 :
+				   	2'b00);
 endmodule

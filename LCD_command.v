@@ -152,7 +152,7 @@ module LCD_command(
 			12	: 	begin ss <= ss + 6'b1; DATA 	<= {write, a};				end
 			13	: 	begin ss <= ss + 6'b1; DATA 	<= {write, l};				end
 			14	: 	begin ss <= ss + 6'b1; DATA 	<= {write, hai_cham};		end		
-			
+//			15	:	begin ss <= ss + 6'b1; DATA 	<= {wait2, 8'd00};				end
 			default: 	begin ss <= 6'b0; state <= 4'd15; DATA 	<= {wait1, 8'd00};	end
 			endcase
 		end
@@ -174,7 +174,7 @@ module LCD_command(
 			11	: 	begin ss <= ss + 6'b1; DATA 	<= {write, encodedData[2]};	end
 			12	: 	begin ss <= ss + 6'b1; DATA 	<= {write, encodedData[1]};	end
 			13	: 	begin ss <= ss + 6'b1; DATA 	<= {write, encodedData[0]};	end
-			14	:	begin ss <= ss + 6'b1; DATA 	<= {wait2, 8'd00};				end
+//			14	:	begin ss <= ss + 6'b1; DATA 	<= {wait2, 8'd00};				end
 			default:		begin ss <= 6'b0; state <= 4'd2; DATA 	<= {wait1, 8'd00};	end
 			endcase
 		end
@@ -183,7 +183,7 @@ module LCD_command(
 		14: begin
 			rdy_command <= 1'b0;
 			DATA 	<= {wait1, 8'd00};
-			ss <= ss;
+			ss <= 6'b0;
 			case(op)
 				0: state <= 4'd0;
 				1: state <= 4'd1;
@@ -194,7 +194,7 @@ module LCD_command(
 		default: begin
 			rdy_command <= 1'b1;
 			DATA 	<= {wait1, 8'd00};
-			ss <= ss;
+			ss <= 6'b0;
 			state <= 4'd14;
 		end
 		

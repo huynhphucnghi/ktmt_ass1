@@ -20,9 +20,9 @@ reg LCD_RS;
 reg LCD_E=0;
 
 // Set flags
-wire flag_250ns, flag_42us, flag_100us, flag_1640us, flag_4100us, flag_15000us, flag_2s, flag_250ms;
+wire flag_250ns, flag_42us, flag_100us, flag_1640us, flag_4100us, flag_15000us, flag_2s;
 reg flag_rst = 1;
-flag_controller flags(CLK, flag_rst, flag_250ns, flag_42us, flag_100us, flag_1640us, flag_4100us, flag_15000us, flag_2s, flag_250ms);
+flag_controller flags(CLK, flag_rst, flag_250ns, flag_42us, flag_100us, flag_1640us, flag_4100us, flag_15000us, flag_2s);
 
 
 

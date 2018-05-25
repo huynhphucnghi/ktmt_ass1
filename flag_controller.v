@@ -1,5 +1,5 @@
 module flag_controller(
-	clk, flag_rst, flag_250ns, flag_42us, flag_100us, flag_1640us, flag_4100us, flag_15000us, flag_2s, flag_250ms
+	clk, flag_rst, flag_250ns, flag_42us, flag_100us, flag_1640us, flag_4100us, flag_15000us, flag_2s
 );
 	input clk, flag_rst;
 	output	flag_250ns,
@@ -8,8 +8,7 @@ module flag_controller(
 				flag_1640us,
 				flag_4100us,
 				flag_15000us,
-				flag_2s,
-				flag_250ms;
+				flag_2s;
 
 
 	reg 	flag_250ns	= 1'b0,
@@ -18,8 +17,7 @@ module flag_controller(
 			flag_1640us	= 1'b0,
 			flag_4100us	= 1'b0,
 			flag_15000us= 1'b0,
-			flag_2s		= 1'b0,
-			flag_250ms		= 1'b0;
+			flag_2s		= 1'b0;
 
 	reg [31:0] cnt_timer = 0;
 	
@@ -32,7 +30,6 @@ module flag_controller(
 	parameter [31:0] t_4100us 	= 196800;
 	parameter [31:0] t_15000us	= 720000;
 	parameter [31:0] t_2s		= 100000000;
-	parameter [31:0] t_250ms	= 12500000;
 	
 //	parameter [31:0] t_40ns 	= 1;
 //	parameter [31:0] t_250ns 	= 1;
@@ -52,7 +49,6 @@ module flag_controller(
 			flag_4100us			<=	1'b0;
 			flag_15000us    	<=	1'b0;
 			flag_2s		    	<=	1'b0;
-			flag_250ms	    	<=	1'b0;
 			cnt_timer	<=	31'b0;
 		end
 		else begin
@@ -99,13 +95,6 @@ module flag_controller(
 			end
 			//----------------------------
 			if(cnt_timer>=t_2s) begin			
-				flag_2s	<=	1'b1;
-			end
-			else begin			
-				flag_2s	<=	flag_2s;
-			end
-			//----------------------------
-			if(cnt_timer>=t_250ms) begin			
 				flag_2s	<=	1'b1;
 			end
 			else begin			

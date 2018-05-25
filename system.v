@@ -4,7 +4,7 @@ module system(
 			input		SYS_reset,
 			input		SYS_load,
 			input [7:0]	SYS_pc_val,
-			input [7:0]	SYS_output_sel,
+			input [3:0]	SYS_output_sel,
 			output [7:0] PC,
 			output reg [31:0]	SYS_leds
 );
@@ -349,19 +349,19 @@ initial begin
 end
 always @(SYS_output_sel) begin
 	case (SYS_output_sel)
-		8'h0: 	SYS_leds = instruction;
-		8'h1: 	SYS_leds = reg_data1;
-		8'h2: 	SYS_leds = ALU_result;
-		8'h3: 	SYS_leds = {10'b0, ALU_status, 9'b0};
-		8'h4: 	SYS_leds = read_data;
-		8'h5: 	SYS_leds = {7'b0, control_signal, 9'b0};
-		8'h6: 	SYS_leds = {14'b0, ALU_control_signal, 9'b0};
-		8'h7: 	SYS_leds = {10'b0, PC, 9'b0};
-		8'h8: 	SYS_leds = {17'b0, disable_signal, 9'b0};
-		8'h81: 	SYS_leds = reg_data2;
-		8'h82: 	SYS_leds = { RegDst_address_WB, 11'b0, RegWrite_WB, Mem2Reg_WB, 9'b0};
-		8'h83: 	SYS_leds = {  F3, F1, F2 };
-		default: SYS_leds = 27'hfffffff;
+		4'h0: 	SYS_leds = instruction;
+		4'h1: 	SYS_leds = reg_data1;
+		4'h2: 	SYS_leds = ALU_result;
+		4'h3: 	SYS_leds = {24'b0, ALU_status};
+		4'h4: 	SYS_leds = read_data;
+		4'h5: 	SYS_leds = {21'b0, control_signal};
+		4'h6: 	SYS_leds = {28'b0, ALU_control_signal};
+		4'h7: 	SYS_leds = {24'b0, PC};
+		4'h8: 	SYS_leds = {31'b0, disable_signal};
+		4'h9: 	SYS_leds = reg_data2;
+		4'ha: 	SYS_leds = { RegDst_address_WB, 3'b0, RegWrite_WB, 3'b0, Mem2Reg_WB};
+		4'hb: 	SYS_leds = { F3, 2'b0, F1, 2'b0, F2 };
+		default: SYS_leds = 32'hffffffff;
 	endcase
 end
 

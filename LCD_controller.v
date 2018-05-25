@@ -25,7 +25,6 @@ module LCD_controller(
 	system system(sys_clk, clk, rst, load, PC, Out_sel, PC_present, data_cmd);
 	wire error = 1;
 	wire stall = 1;
-	LED7HEX HEX(HEX0, HEX1, error, stall, clk, rst);
 	// Data
 	
 	

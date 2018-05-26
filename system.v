@@ -120,7 +120,7 @@ REG _REG(
 
 // Load-use data hazard
 wire load_hazard_signal;
-Data_hazard _Data_hazard(
+Load_use_data_hazard _Load_use_data_hazard(
 	.IF_ID_rs(rs), 
 	.IF_ID_rt(rt),
 	.ID_EX_rt(rt_EX),
@@ -356,7 +356,7 @@ always @(SYS_output_sel) begin
 		4'h4: 	SYS_leds = read_data;
 		4'h5: 	SYS_leds = {21'b0, control_signal};
 		4'h6: 	SYS_leds = {28'b0, ALU_control_signal};
-		4'h7: 	SYS_leds = {24'b0, PC};
+		4'h7: 	SYS_leds = {31'b0, PC_valid};
 		4'h8: 	SYS_leds = {31'b0, disable_signal};
 		4'h9: 	SYS_leds = reg_data2;
 		4'ha: 	SYS_leds = { RegDst_address_WB, 3'b0, RegWrite_WB, 3'b0, Mem2Reg_WB};

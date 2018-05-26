@@ -1,4 +1,4 @@
-module Data_hazard(
+module Load_use_data_hazard(
 	input 		[4:0] IF_ID_rs, IF_ID_rt,
 	input 		[4:0] ID_EX_rt,
 	input			ID_EX_mem_read,

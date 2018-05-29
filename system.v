@@ -1,6 +1,8 @@
 module system(
 			input		SYS_clk,
 			input		SYS_clk_50,
+			input		SYS_rx,
+			input		SYS_reset_IMEM,
 			input		SYS_reset,
 			input		SYS_load,
 			input 	[7:0]	SYS_pc_val,
@@ -42,12 +44,20 @@ PC_register _PC_register(
 
 // Instruction memory
 wire [31:0] instruction;
-IMEM _IMEM(
-	{26'b0, PC[7:2]},
-	SYS_clk_50,
-	32'b0,
-	1'b0,
-	instruction
+//IMEM _IMEM(
+//	{26'b0, PC[7:2]},
+//	SYS_clk_50,
+//	32'b0,
+//	1'b0,
+//	instruction
+//);
+N_IMEM(
+			SYS_clk_50, 
+			SYS_rx,
+			1'b1,
+			SYS_reset_IMEM, 
+			PC[7:2], 
+			instruction
 );
 
 // EPC

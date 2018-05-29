@@ -1,8 +1,9 @@
 module LCD_controller(
-	clk, sys_clk, rst, load, PC, Out_sel, 
+	clk, sys_clk, SYS_rx, SYS_reset_IMEM, rst, load, PC, Out_sel, 
 	LCD_RS, LCD_RW, LCD_EN, LCD_DATA, rdy_cmd, rdy_exe, state, HEX_S, HEX_E, HEX_U,
 );
 	input clk, sys_clk, rst, load;
+	input SYS_rx, SYS_reset_IMEM;
 	input [7:0] PC;
 	input [3:0] Out_sel;
 	output LCD_RS, LCD_RW, LCD_EN, rdy_cmd, rdy_exe;
@@ -24,7 +25,7 @@ module LCD_controller(
 	LCD_executor executor(clk, enb_exe, rst_exe, op_exe, data_exe, LCD_RS, LCD_RW, LCD_EN, LCD_DATA, rdy_exe);
 
 	wire stall, exception, PC_unvalid;
-	system system(sys_clk, clk, rst, load, PC, Out_sel, PC_present, stall, 
+	system system(sys_clk, clk, SYS_rx, SYS_reset_IMEM, rst, load, PC, Out_sel, PC_present, stall, 
 						exception, PC_unvalid,
 						data_cmd);
 	

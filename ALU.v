@@ -55,13 +55,13 @@ module ALU(
 					carry = 1'b0;
 				end	
 		4'b1110:	begin	//	sll
-					ALU_result = ALU_operand_1 << ALU_shamt;
+					ALU_result = ALU_operand_2 << ALU_shamt;
 					zero = (ALU_result == 32'b0);
 					overflow = 1'b0;
 					carry = 1'b0;
 				end
 		4'b1111:	begin	//	slr
-					ALU_result = ALU_operand_1 >> ALU_shamt;
+					ALU_result = ALU_operand_2 >> ALU_shamt;
 					zero = (ALU_result == 32'b0);
 					overflow = 1'b0;
 					carry = 1'b0;

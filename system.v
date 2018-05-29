@@ -3,9 +3,10 @@ module system(
 			input		SYS_clk_50,
 			input		SYS_reset,
 			input		SYS_load,
-			input [7:0]	SYS_pc_val,
-			input [3:0]	SYS_output_sel,
-			output [7:0] PC,
+			input 	[7:0]	SYS_pc_val,
+			input 	[3:0]	SYS_output_sel,
+			output 	[7:0] PC,
+			output 	stall_signal, exception_signal, PC_unvalid_signal,
 			output reg [31:0]	SYS_leds
 );
 
@@ -177,6 +178,7 @@ wire [31:0]	reg_data1_EX;
 wire [31:0]	reg_data2_EX; 
 wire [31:0]	sign_extend_EX;
 wire [4:0]	rs_EX, rt_EX, rd_EX;
+wire Exception_EX;
 Reg_ID_EX _Reg_ID_EX(
 		SYS_clk,
 		// input
@@ -187,6 +189,7 @@ Reg_ID_EX _Reg_ID_EX(
 		instruction_ID,
 		reg_data1, reg_data2, sign_extend,
 		rs, rt, rd,
+		Exception,
 		// output
 		{RegWrite_EX, Mem2Reg_EX},
 		{MemWrite_EX, MemRead_EX},
@@ -194,7 +197,8 @@ Reg_ID_EX _Reg_ID_EX(
 		PC_EX,
 		instruction_EX,
 		reg_data1_EX, reg_data2_EX, sign_extend_EX,
-		rs_EX, rt_EX, rd_EX
+		rs_EX, rt_EX, rd_EX,
+		Exception_EX
 );
 
 ////////////////////////////////////////////
@@ -253,6 +257,8 @@ exception_handle _exception_handle(
 		.ALU_status(ALU_status),
 		.RegDst_address(RegDst_address),
 		.mem_read(MemRead_EX), .mem_write(MemWrite_EX),
+		.reg_write(RegWrite_EX),
+		.Exception(Exception_EX),
 		.disable_signal(disable_signal)
 );
 
@@ -342,6 +348,11 @@ Forwarding _Forwarding(
 	.F2(F2),
 	.F3(F3)
 );
+
+// Display result on LED7HEX
+assign PC_unvalid_signal = ~PC_valid;
+assign stall_signal = Jump || Branch || load_hazard_signal;
+assign exception_signal = disable_signal;
 
 // Display result on leds
 initial begin

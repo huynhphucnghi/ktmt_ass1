@@ -29,9 +29,9 @@ module Reg_EX_MEM(
 		if(disable_signal) begin
 			_WB <= 2'b0;
 			_M <= 2'b0;
-			_ALU_status <= 8'b0;
-			_write_data <= 32'b0;
-			_RegDst_address <= 5'b0;
+//			_ALU_status <= 8'b0;
+//			_write_data <= 32'b0;
+//			_RegDst_address <= 5'b0;
 		end
 		else begin
 			_WB <= WB;

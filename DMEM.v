@@ -16,5 +16,5 @@ module DMEM(
 		end
 	end
 
-	assign DMEM_data_out = (DMEM_mem_read) ? memory[DMEM_address] : 32'd0;
+	assign DMEM_data_out = (DMEM_mem_read) ? memory[DMEM_address[31:2]] : 32'd0;
 endmodule
